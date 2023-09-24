@@ -6,7 +6,7 @@ spring:
   jpa:
     open-in-view: false
   liquibase:
-    change-log: classpath:liquibase/changelog-master.yaml
+    change-log: classpath:liquibase/changelog-master.yml
     url: jdbc:postgresql://localhost:4242/spring_webflux_db
     user: postgres
     password: secret

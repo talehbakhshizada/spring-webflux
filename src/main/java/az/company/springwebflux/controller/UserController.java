@@ -38,9 +38,9 @@ public class UserController {
         return  userService.saveUser(userRequest);
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public Mono<Void> deleteUser(@PathVariable Long id, @RequestBody UpdateUserRequest request){
+    public Mono<Void> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request){
         return  userService.updateUser(id,request);
     }
 

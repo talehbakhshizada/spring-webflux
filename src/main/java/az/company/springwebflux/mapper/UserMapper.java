@@ -17,6 +17,8 @@ public class UserMapper {
                 .username(entity.getUsername())
                 .age(entity.getAge())
                 .birthPlace(entity.getBirthPlace())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 

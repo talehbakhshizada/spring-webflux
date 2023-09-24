@@ -1,6 +1,7 @@
 package az.company.springwebflux.service;
 
 import az.company.springwebflux.dao.repository.UserRepository;
+import az.company.springwebflux.exception.NotFoundException;
 import az.company.springwebflux.mapper.UserMapper;
 import az.company.springwebflux.model.request.SaveUserRequest;
 import az.company.springwebflux.model.request.UpdateUserRequest;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static az.company.springwebflux.mapper.UserMapper.mapRequestToEntity;
+import static az.company.springwebflux.model.constant.ErrorMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,31 +24,40 @@ import static az.company.springwebflux.mapper.UserMapper.mapRequestToEntity;
 public class UserService {
 
     UserRepository userRepository;
+
     public Mono<UserResponse> getUser(Long id) {
         return userRepository.findById(id)
                 .map(UserMapper::mapEntityToResponse)
                 .doOnSuccess(userResponse -> {
                     log.info("User successfully retrieved, USER: {}", userResponse);
                 })
-                .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(String.valueOf(USER_NOT_FOUND),
+                        String.format(USER_NOT_FOUND.getMessage(), id))));
     }
 
     public Flux<UserResponse> getUsers() {
         return userRepository.findAll().map(UserMapper::mapEntityToResponse);
     }
 
-    public Mono<Void> saveUser(SaveUserRequest user){
+    public Mono<Void> saveUser(SaveUserRequest user) {
         return userRepository.save(mapRequestToEntity(user)).then();
     }
 
     public Mono<Void> updateUser(Long id, UpdateUserRequest request) {
-        var user = userRepository.findById(id).switchIfEmpty(Mono.error(new RuntimeException("User not found")));
-       // user.map(UserMapper.updateUser(user,request));
-       // UserMapper.updateUser(user, request);
+        return userRepository.findById(id)
+                .switchIfEmpty(Mono.error(() -> new NotFoundException(String.valueOf(USER_NOT_FOUND),
+                        String.format(USER_NOT_FOUND.getMessage(), id))))
+                .flatMap(userEntity -> {
+                    UserMapper.updateUser(userEntity, request);
+                    return userRepository.save(userEntity);
+                })
+                .then();
     }
 
     public Mono<Void> deleteUser(Long id) {
-        return userRepository.deleteById(id);
+        return userRepository.deleteById(id).switchIfEmpty(
+                Mono.error(() -> new NotFoundException(String.valueOf(USER_NOT_FOUND),
+                        String.format(USER_NOT_FOUND.getMessage(), id))));
     }
 
 }
