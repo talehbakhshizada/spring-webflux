@@ -1,5 +1,6 @@
 package az.company.springwebflux.service;
 
+import az.company.springwebflux.clent.StudentWebClient;
 import az.company.springwebflux.dao.repository.UserRepository;
 import az.company.springwebflux.exception.NotFoundException;
 import az.company.springwebflux.mapper.UserMapper;
@@ -24,6 +25,7 @@ import static az.company.springwebflux.model.constant.ErrorMessage.*;
 public class UserService {
 
     UserRepository userRepository;
+    StudentWebClient studentWebClient;
 
     public Mono<UserResponse> getUser(Long id) {
         return userRepository.findById(id)
@@ -36,6 +38,7 @@ public class UserService {
     }
 
     public Flux<UserResponse> getUsers() {
+        //var students = studentWebClient.retrieveStudents();
         return userRepository.findAll().map(UserMapper::mapEntityToResponse);
     }
 
